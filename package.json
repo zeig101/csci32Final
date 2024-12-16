@@ -1,14 +1,26 @@
 {
   "name": "my-turborepo",
   "private": true,
+  "prisma": {
+    "schema": "packages/game-review-db/prisma/schema.prisma",
+    "seed": "tsx packages/game-review-db/src/seed.ts"
+  },
   "scripts": {
     "build": "turbo build",
+    "db:migrate:deploy": "turbo run db:migrate:deploy",
+    "db:push": "turbo run db:push",
+    "db:seed": "turbo run db:seed",
     "dev": "turbo dev",
     "lint": "turbo lint",
+    "generate": "turbo run generate",
     "format": "prettier --write \"**/*.{ts,tsx,md}\""
   },
   "devDependencies": {
+    "@repo/typescript-config": "^0.0.0",
+    "cross-env": "^7.0.3",
     "prettier": "^3.2.5",
+    "prisma": "5.10.2",
+    "tsx": "4.19.1",
     "turbo": "^2.3.3",
     "typescript": "5.5.4"
   },
@@ -19,5 +31,12 @@
   "workspaces": [
     "apps/*",
     "packages/*"
-  ]
+  ],
+  "dependencies": {
+    "@fastify/autoload": "^5.10.0",
+    "@fastify/mysql": "^5.0.1",
+    "@prisma/client": "5.10.2",
+    "fastify": "^4.29.0",
+    "tailwindcss": "^3.4.16"
+  }
 }

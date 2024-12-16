@@ -1,0 +1,47 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+  relationMode = "prisma"
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+model User {
+  id        String    @id @default(cuid())
+  name      String
+  email     String?
+  reviews   Review[] //user can write multiple reviews
+}
+
+model Genre {
+  id    String @id @default(cuid())
+  name  String @unique
+  games Game[] @relation("GameToGenre")
+}
+
+model Game {
+  id            String  @id @default(cuid())
+  title         String  @unique
+  genres        Genre[] @relation("GameToGenre")
+  reviews       Review[] //array because a game can have multiple reviews
+  entryDate     DateTime @default(now())
+  releaseDate   DateTime?
+}
+
+model Review {
+  id        String @id @default(cuid())
+  title     String
+  rating    Int @default(0)
+  gameId    String
+  game      Game @relation(fields: [gameId], references: [id])
+  date      DateTime @default(now())
+  userId    String
+  user      User @relation(fields: [userId], references: [id])
+
+  @@unique([userId, gameId])
+}
