@@ -12,35 +12,35 @@ generator client {
 }
 
 model User {
-  id        String    @id @default(cuid())
-  name      String
-  email     String?
-  reviews   Review[] //user can write multiple reviews
+  user_id        String    @id @default(cuid())//all the ids use the modelname_id because it makes the service easier to read
+  name           String
+  email          String?
+  reviews        Review[]
 }
 
 model Genre {
-  id    String @id @default(cuid())
-  name  String @unique
-  games Game[] @relation("GameToGenre")
+  genre_id    String @id @default(cuid())
+  name        String @unique
+  games       Game[] @relation("GameToGenre")
 }
 
 model Game {
-  id            String  @id @default(cuid())
-  title         String  @unique
-  genres        Genre[] @relation("GameToGenre")
-  reviews       Review[] //array because a game can have multiple reviews
-  entryDate     DateTime @default(now())
-  releaseDate   DateTime?//release dates not mandatory, review may be for unreleased game or date may be unknown
+  game_id        String   @id @default(cuid())
+  title          String   @unique
+  genres         Genre[]  @relation("GameToGenre")
+  reviews        Review[]
+  entryDate      DateTime @default(now())
+  releaseDate    DateTime?
 }
 
 model Review {
-  id        String @id @default(cuid())
-  rating    Int @default(0)
-  gameId    String
-  game      Game @relation(fields: [gameId], references: [id])
-  date      DateTime @default(now())
-  userId    String
-  user      User @relation(fields: [userId], references: [id])
+  review_id      String   @id @default(cuid())
+  rating         Int      @default(0)
+  game_id        String
+  game           Game     @relation(fields: [game_id], references: [game_id])
+  date           DateTime @default(now())
+  user_id        String
+  user           User     @relation(fields: [user_id], references: [user_id])
 
-  @@unique([userId, gameId])
+  @@unique([user_id, game_id])
 }

@@ -3,9 +3,7 @@ import * as path from 'path'
 import { fileURLToPath } from 'url'
 import { createServer } from './server.js'
 
-export type AppOptions = {
-  // Place your custom options for app below here.
-} & Partial<AutoloadPluginOptions>
+export type AppOptions = {} & Partial<AutoloadPluginOptions>
 
 const options: AppOptions = {
   options: {},
@@ -22,8 +20,11 @@ void fastify.register(AutoLoad, {
   forceESM: true,
 })
 
-// This loads all plugins defined in routes
-// define your routes in one of these
+fastify.get('/debug-routes', async (request, reply) => {
+  console.log(fastify.printRoutes())
+  return fastify.printRoutes()
+})
+
 void fastify.register(AutoLoad, {
   dir: path.join(__dirname, 'routes'),
   options,

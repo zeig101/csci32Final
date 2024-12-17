@@ -1,5 +1,4 @@
 import { Prisma, PrismaClient } from '@prisma/client'
-import { error } from 'console'
 import { FastifyBaseLogger } from 'fastify'
 
 export enum SortOrder {
@@ -23,6 +22,8 @@ interface FindManyReviewProps {
   take?: number
   skip?: number
   orderBy?: Prisma.ReviewOrderByWithRelationInput
+  userId?: string
+  gameId?: string
 }
 
 interface CreateGenreProps {
@@ -32,7 +33,7 @@ interface CreateGenreProps {
 interface CreateOneReviewProps {
   title: string
   rating: number
-  gameId?: string
+  gameId: string
   userId: string
   genreName: string
 }
@@ -63,7 +64,11 @@ export class ReviewService {
   async findOneReview({ id }: FindOneReviewProps) {
     try {
       return this.prisma.review.findUnique({
-        where: { id },
+        where: { review_id: id },
+        include: {
+          game: true,
+          user: true,
+        },
       })
     } catch (error) {
       this.logger.error(`Error fetching review ${id}`, error)
@@ -71,7 +76,35 @@ export class ReviewService {
     }
   }
 
-  async CreateOneReview({ title, rating, gameId, userId, genreName }: CreateOneReviewProps & { genreName: string }) {
+  async findManyReviews({ take = DEFAULT_TAKE, skip = DEFAULT_SKIP, orderBy, userId, gameId }: FindManyReviewProps) {
+    try {
+      const where: Prisma.ReviewWhereInput = {}
+
+      if (userId) {
+        where.user_id = userId
+      }
+
+      if (gameId) {
+        where.game_id = gameId
+      }
+
+      return this.prisma.review.findMany({
+        take,
+        skip,
+        where,
+        orderBy,
+        include: {
+          game: true,
+          user: true,
+        },
+      })
+    } catch (error) {
+      this.logger.error('Error fetching reviews', error)
+      throw new Error('Failed to fetch reviews')
+    }
+  }
+
+  async createOneReview({ title, rating, gameId, userId, genreName }: CreateOneReviewProps) {
     try {
       let genre = await this.prisma.genre.findUnique({
         where: { name: genreName.toLowerCase() },
@@ -84,7 +117,7 @@ export class ReviewService {
       }
 
       let game = await this.prisma.game.findUnique({
-        where: { title: title.toLowerCase() },
+        where: { game_id: gameId },
       })
 
       if (!game) {
@@ -92,7 +125,7 @@ export class ReviewService {
           data: {
             title: title.toLowerCase(),
             genres: {
-              connect: { id: genre.id },
+              connect: { genre_id: genre.genre_id },
             },
           },
         })
@@ -100,24 +133,15 @@ export class ReviewService {
 
       return this.prisma.review.create({
         data: {
-          title,
           rating,
-          gameId: game.id,
-          userId,
+          game_id: game.game_id,
+          user_id: userId,
         },
       })
     } catch (error) {
       this.logger.error('Error creating review:', error)
       throw new Error('Failed to create review')
     }
-  }
-
-  async findManyReviews({ take = DEFAULT_TAKE, skip = DEFAULT_SKIP, orderBy }: FindManyReviewProps) {
-    return this.prisma.review.findMany({
-      take,
-      skip,
-      orderBy,
-    })
   }
 
   async createGenre({ name }: CreateGenreProps) {

@@ -2,7 +2,7 @@ import fp from 'fastify-plugin'
 import fastifySwagger, { FastifyDynamicSwaggerOptions } from '@fastify/swagger'
 import fastifySwaggerUi from '@fastify/swagger-ui'
 
-export default fp(async (fastify) => {
+export default fp<FastifyDynamicSwaggerOptions>(async (fastify) => {
   fastify.register(fastifySwagger, {
     openapi: {
       openapi: '3.0.0',
@@ -32,5 +32,5 @@ export default fp(async (fastify) => {
       },
     },
   })
-  await fastify.register(fastifySwaggerUi), { routePrefix: '/docs' }
+  fastify.register(fastifySwaggerUi), { RoutePrefix: './docs' }
 })
