@@ -20,7 +20,7 @@ void fastify.register(AutoLoad, {
   forceESM: true,
 })
 
-fastify.get('/debug-routes', async (request, reply) => {
+fastify.get('/debug', async (request, reply) => {
   console.log(fastify.printRoutes())
   return fastify.printRoutes()
 })

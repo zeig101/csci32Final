@@ -13,7 +13,7 @@ export default fp<FastifyDynamicSwaggerOptions>(async (fastify) => {
       },
       servers: [
         {
-          url: '127.0.0.1:7000',
+          url: 'http://127.0.0.1:7000',
           description: 'Development server',
         },
       ],
@@ -32,5 +32,5 @@ export default fp<FastifyDynamicSwaggerOptions>(async (fastify) => {
       },
     },
   })
-  fastify.register(fastifySwaggerUi), { RoutePrefix: './docs' }
+  fastify.register(fastifySwaggerUi, { routePrefix: '/docs' })
 })
