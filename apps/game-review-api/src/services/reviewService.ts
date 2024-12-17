@@ -87,6 +87,9 @@ export class ReviewService {
   }
 
   async createOneReview({ rating, game_title }: CreateOneReviewProps) {
+    const testConnection = await this.prisma.game.findMany()
+    console.log('Database connection test result:', testConnection)
+
     try {
       console.log('Searching for game with title:', game_title)
       let game = await this.prisma.game.findUnique({
@@ -94,15 +97,15 @@ export class ReviewService {
       })
 
       if (!game) {
-        console.log('No match found, creating entry for:', game_title)
+        console.log('No match found, creating entry for:', game_title) //AFAICT it never gets past here
         game = await this.prisma.game.create({
           data: {
             title: game_title,
           },
         })
-        console.log('game made:', game)
+        console.log('game made:', game) //never logs
       } else {
-        console.log('game found:', game)
+        console.log('game found:', game) //also never got to this. Everything past here never shows up until the catch
       }
       console.log('made game for', game.title)
       console.log('making review for', game.title)
@@ -116,6 +119,7 @@ export class ReviewService {
       console.log('Review created:', review)
       return review
     } catch (error) {
+      //here's the catch.
       this.logger.error(`Error creating review for "${game_title}":`, error)
 
       if (error instanceof PrismaClientKnownRequestError) {
@@ -130,3 +134,4 @@ export class ReviewService {
     }
   }
 }
+//I tried so hard to get this working and just couldn't make it happen
