@@ -21,6 +21,7 @@ void fastify.register(AutoLoad, {
 })
 
 fastify.get('/debug', async (request, reply) => {
+  //made a debug log to find things
   console.log(fastify.printRoutes())
   return fastify.printRoutes()
 })
