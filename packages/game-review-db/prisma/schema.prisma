@@ -1,32 +1,29 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
-datasource db {
-  provider = "mysql"
-  url      = env("DATABASE_URL")
-  relationMode = "prisma"
-}
-
 generator client {
   provider = "prisma-client-js"
 }
 
+datasource db {
+  provider     = "mysql"
+  url          = env("DATABASE_URL")
+  relationMode = "prisma"
+}
+
 model User {
-  user_id        String    @id @default(cuid())//all the ids use the modelname_id because it makes the service easier to read
-  name           String
-  email          String?
+  name    String
+  email   String?
+  user_id String  @id @default(cuid())
 }
 
 model Game {
-  title          String   @unique
-  reviews        Review[]
+  title   String   @unique
+  reviews Review[]
 }
 
 model Review {
-  review_id      String   @id @default(cuid())
-  rating         Int      @default(0)
-  game_title        String
-  game           Game     @relation(fields: [game_title], references: [title])
+  rating     Int    @default(0)
+  review_id  String @id @default(cuid())
+  game_title String
+  game       Game   @relation(fields: [game_title], references: [title])
 
   @@unique([game_title, review_id])
   @@index([game_title])

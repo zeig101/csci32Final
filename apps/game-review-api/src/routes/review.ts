@@ -111,23 +111,11 @@ const review: FastifyPluginAsync = async (fastify, opts): Promise<void> => {
         },
       },
     },
-    async (request: any, reply) => {
-      const { rating, game_title } = request.body as { rating: number; game_title: string }
-      try {
-        const review = await fastify.reviewService.createOneReview({
-          rating,
-          game_title,
-        })
-
-        return reply.status(200).send({ review_id: review.review_id })
-      } catch (error) {
-        console.error('Error creating review:', error)
-        return reply.status(404).send({
-          message: 'Failed to create review',
-          error: 'Not Found',
-          statusCode: 404,
-        })
-      }
+    async function (request, reply) {
+      return fastify.reviewService.createOneReview({
+        rating: request.body.rating,
+        game_title: request.body.game_title,
+      })
     },
   )
 }

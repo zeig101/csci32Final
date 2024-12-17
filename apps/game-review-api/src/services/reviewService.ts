@@ -1,6 +1,13 @@
-import { Prisma, PrismaClient } from '@prisma/client'
+import { Prisma } from '@prisma/client'
+import { PrismaClient } from '@prisma/client'
 import { PrismaClientKnownRequestError } from '@prisma/client/runtime/library'
 import { FastifyBaseLogger } from 'fastify'
+import dotenv from 'dotenv'
+
+dotenv.config()
+const prisma = new PrismaClient()
+
+console.log('DATABASE_URL:', process.env.DATABASE_URL)
 
 export enum SortOrder {
   ASC = 'asc',
@@ -86,11 +93,19 @@ export class ReviewService {
     }
   }
 
-  async createOneReview({ rating, game_title }: CreateOneReviewProps) {
-    const testConnection = await this.prisma.game.findMany()
-    console.log('Database connection test result:', testConnection)
-
-    try {
+  async createOneReview(props: CreateOneReviewProps) {
+    this.logger.info({ props }, 'createOneReview')
+    const { rating, game_title } = props
+    const review = await this.prisma.review.create({
+      data: {
+        rating,
+        game_title,
+      },
+    })
+    return review
+  }
+}
+/*    try {
       console.log('Searching for game with title:', game_title)
       let game = await this.prisma.game.findUnique({
         where: { title: game_title },
@@ -134,4 +149,4 @@ export class ReviewService {
     }
   }
 }
-//I tried so hard to get this working and just couldn't make it happen
+//I tried so hard to get this working and just couldn't make it happen*/
