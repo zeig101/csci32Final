@@ -30,7 +30,7 @@ model Game {
   genres        Genre[] @relation("GameToGenre")
   reviews       Review[] //array because a game can have multiple reviews
   entryDate     DateTime @default(now())
-  releaseDate   DateTime?
+  releaseDate   DateTime?//release dates not mandatory, review may be for unreleased game or date may be unknown
 }
 
 model Review {
