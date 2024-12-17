@@ -35,7 +35,6 @@ model Game {
 
 model Review {
   id        String @id @default(cuid())
-  title     String
   rating    Int @default(0)
   gameId    String
   game      Game @relation(fields: [gameId], references: [id])
