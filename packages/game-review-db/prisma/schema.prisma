@@ -15,30 +15,19 @@ model User {
   user_id        String    @id @default(cuid())//all the ids use the modelname_id because it makes the service easier to read
   name           String
   email          String?
-  reviews        Review[]
-}
-
-model Genre {
-  genre_id    String @id @default(cuid())
-  name        String @unique
-  games       Game[] @relation("GameToGenre")
 }
 
 model Game {
-  game_id        String   @id @default(cuid())
   title          String   @unique
-  genres         Genre[]  @relation("GameToGenre")
   reviews        Review[]
 }
 
 model Review {
   review_id      String   @id @default(cuid())
   rating         Int      @default(0)
-  game_id        String
-  game           Game     @relation(fields: [game_id], references: [game_id])
-  user_id        String
-  user           User     @relation(fields: [user_id], references: [user_id])
+  game_title        String
+  game           Game     @relation(fields: [game_title], references: [title])
 
-  @@unique([user_id, game_id])
-  @@index([game_id])
+  @@unique([game_title, review_id])
+  @@index([game_title])
 }

@@ -4,14 +4,13 @@ import { Type } from '@sinclair/typebox'
 
 export const CreateReviewTypeboxType = Type.Object({
   rating: Type.Integer(),
-  gameId: Type.String(),
+  game_title: Type.String(),
 })
 
 export const ReviewType = Type.Object({
   review_id: Type.String(),
   rating: Type.Integer(),
-  game_id: Type.String(),
-  user_id: Type.String(),
+  game_title: Type.String(),
 })
 
 export const ReviewNotFoundType = Type.Object({
@@ -38,8 +37,7 @@ const review: FastifyPluginAsync = async (fastify, opts): Promise<void> => {
         const reviews = await fastify.reviewService.findManyReviews({
           take: request.query.take,
           skip: request.query.skip,
-          userId: request.query.userId,
-          gameId: request.query.gameId,
+          game_title: request.query.game_title,
         })
 
         if (!reviews || reviews.length === 0) {
@@ -52,7 +50,7 @@ const review: FastifyPluginAsync = async (fastify, opts): Promise<void> => {
 
         return reply.status(200).send(reviews)
       } catch (error) {
-        console.error('Error fetching reviews:', error)
+        console.error('Error getting reviews:', error)
         return reply.status(404).send({
           statusCode: 404,
           message: 'Reviews not found',
@@ -93,7 +91,7 @@ const review: FastifyPluginAsync = async (fastify, opts): Promise<void> => {
         console.error('Error getting review:', error)
         return reply.status(404).send({
           statusCode: 404,
-          message: 'Review not found',
+          message: 'not actual 404, unknown error',
           error: 'Not Found',
         })
       }
@@ -114,15 +112,11 @@ const review: FastifyPluginAsync = async (fastify, opts): Promise<void> => {
       },
     },
     async (request: any, reply) => {
-      const { rating, gameId } = request.body as { rating: number; gameId: string }
+      const { rating, game_title } = request.body as { rating: number; game_title: string }
       try {
-        const userId = 'example-Id'
         const review = await fastify.reviewService.createOneReview({
-          title: 'Example Game Title',
           rating,
-          game_Id: gameId,
-          user_Id: userId,
-          genreName: 'example-genre',
+          game_title,
         })
 
         return reply.status(200).send({ review_id: review.review_id })
