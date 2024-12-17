@@ -4,7 +4,7 @@ import type { User } from '@prisma/client'
 
 const DEFAULT_USERS: Array<Partial<User>> = [
   {
-    id: '12321',
+    user_id: '12321',
     name: 'Game Reviewer',
   },
 ]
@@ -14,7 +14,7 @@ const DEFAULT_USERS: Array<Partial<User>> = [
     await Promise.all(
       DEFAULT_USERS.map((user) =>
         prisma.user.upsert({
-          where: { id: user.id! },
+          where: { id: user.user_id! },
           update: { ...user },
           create: { ...user },
         }),

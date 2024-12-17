@@ -1,4 +1,4 @@
-import Fastify, { FastifyPluginAsync } from 'fastify'
+import { FastifyPluginAsync } from 'fastify'
 import { TypeBoxTypeProvider } from '@fastify/type-provider-typebox'
 import { Type } from '@sinclair/typebox'
 
@@ -8,11 +8,10 @@ export const CreateReviewTypeboxType = Type.Object({
 })
 
 export const ReviewType = Type.Object({
-  id: Type.String(),
+  review_id: Type.String(),
   rating: Type.Integer(),
-  gameId: Type.String(),
-  date: Type.String(),
-  userId: Type.String(),
+  game_id: Type.String(),
+  user_id: Type.String(),
 })
 
 export const ReviewNotFoundType = Type.Object({
@@ -34,44 +33,67 @@ const review: FastifyPluginAsync = async (fastify, opts): Promise<void> => {
         },
       },
     },
-    async function (request any, reply) {
-      return fastify.reviewService.findManyReviews({
-        
-      })
-        })
-      }
-    },
-  )
-  fastify.withTypeProvider<TypeBoxTypeProvider>().get(
-    '/reviews/:id',
-    {
-      schema: {
-        tags: ['Endpoint: get one review'],
-        description: 'Endpoint to get one review',
-        response: {
-          200: ReviewType,
-          404: ReviewNotFoundType,
-        },
-      },
-    },
-    async function (request: any, reply) {
+    async (request: any, reply) => {
       try {
-        const review = await this.prisma.review.findUnique({
-          where: { id: request.params.id },
+        const reviews = await fastify.reviewService.findManyReviews({
+          take: request.query.take,
+          skip: request.query.skip,
+          userId: request.query.userId,
+          gameId: request.query.gameId,
         })
-        if (!review) {
+
+        if (!reviews || reviews.length === 0) {
           return reply.status(404).send({
             statusCode: 404,
             message: 'Reviews not found',
             error: 'Not Found',
           })
         }
-        return review
+
+        return reply.status(200).send(reviews)
       } catch (error) {
-        console.error('Error getting review:', error)
-        return reply.status(500).send({
+        console.error('Error fetching reviews:', error)
+        return reply.status(404).send({
           statusCode: 404,
           message: 'Reviews not found',
+          error: 'Not Found',
+        })
+      }
+    },
+  )
+
+  fastify.withTypeProvider<TypeBoxTypeProvider>().get(
+    '/reviews/:id',
+    {
+      schema: {
+        tags: ['Endpoint: Get one review'],
+        description: 'Endpoint to get one review by review_id',
+        response: {
+          200: ReviewType,
+          404: ReviewNotFoundType,
+        },
+      },
+    },
+    async (request: any, reply) => {
+      try {
+        const review = await fastify.reviewService.findOneReview({
+          review_id: request.params.id,
+        })
+
+        if (!review) {
+          return reply.status(404).send({
+            statusCode: 404,
+            message: 'Review not found',
+            error: 'Not Found',
+          })
+        }
+
+        return reply.status(200).send(review)
+      } catch (error) {
+        console.error('Error getting review:', error)
+        return reply.status(404).send({
+          statusCode: 404,
+          message: 'Review not found',
           error: 'Not Found',
         })
       }
@@ -83,34 +105,34 @@ const review: FastifyPluginAsync = async (fastify, opts): Promise<void> => {
     {
       schema: {
         tags: ['Endpoint: Create a review'],
-        description: 'Endpoint to create a review',
+        description: 'Endpoint to create a new review',
         body: CreateReviewTypeboxType,
         response: {
           200: Type.Object({ review_id: Type.String() }),
-          400: Type.Object({ message: Type.String() }),
+          404: ReviewNotFoundType,
         },
       },
     },
-    async function (request, reply) {
+    async (request: any, reply) => {
       const { rating, gameId } = request.body as { rating: number; gameId: string }
       try {
-        const game = await this.prisma.game.findUnique({
-          where: { id: gameId },
+        const userId = 'example-Id'
+        const review = await fastify.reviewService.createOneReview({
+          title: 'Example Game Title',
+          rating,
+          game_Id: gameId,
+          user_Id: userId,
+          genreName: 'example-genre',
         })
-        if (!game) {
-          return reply.status(404).send({ message: 'Game not found' })
-        }
-        const review = await this.prisma.review.create({
-          data: {
-            rating,
-            gameId,
-            userId: 'example-Id',
-          },
-        })
-        return reply.status(201).send({ review_id: review.id })
+
+        return reply.status(200).send({ review_id: review.review_id })
       } catch (error) {
         console.error('Error creating review:', error)
-        return reply.status(500).send({ message: 'Failed to create review' })
+        return reply.status(404).send({
+          message: 'Failed to create review',
+          error: 'Not Found',
+          statusCode: 404,
+        })
       }
     },
   )
