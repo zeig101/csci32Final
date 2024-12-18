@@ -32,31 +32,15 @@ const review: FastifyPluginAsync = async (fastify, opts): Promise<void> => {
         },
       },
     },
-    async (request: any, reply) => {
-      try {
-        const reviews = await fastify.reviewService.findManyReviews({
+    async function (request: any, reply) {
+      return fastify.reviewService.findManyReviews({
           take: request.query.take,
           skip: request.query.skip,
           game_title: request.query.game_title,
-        })
-
-        if (!reviews || reviews.length === 0) {
-          return reply.status(404).send({
-            statusCode: 404,
-            message: 'Reviews not found',
-            error: 'Not Found',
-          })
+          review_id: request.query.review_id,
+          rating: request.query.rating,
         }
-
-        return reply.status(200).send(reviews)
-      } catch (error) {
-        console.error('Error getting reviews:', error)
-        return reply.status(404).send({
-          statusCode: 404,
-          message: 'Reviews not found',
-          error: 'Not Found',
-        })
-      }
+      )
     },
   )
 
@@ -72,32 +56,12 @@ const review: FastifyPluginAsync = async (fastify, opts): Promise<void> => {
         },
       },
     },
-    async (request: any, reply) => {
-      try {
-        const review = await fastify.reviewService.findOneReview({
-          review_id: request.params.id,
-        })
-
-        if (!review) {
-          return reply.status(404).send({
-            statusCode: 404,
-            message: 'Review not found',
-            error: 'Not Found',
-          })
-        }
-
-        return reply.status(200).send(review)
-      } catch (error) {
-        console.error('Error getting review:', error)
-        return reply.status(404).send({
-          statusCode: 404,
-          message: 'not actual 404, unknown error',
-          error: 'Not Found',
-        })
-      }
+    async function (request: any, reply) {
+      return fastify.reviewService.findOneReview({
+        review_id: request.params.id
+      })
     },
   )
-
   fastify.withTypeProvider<TypeBoxTypeProvider>().post(
     '/reviews',
     {

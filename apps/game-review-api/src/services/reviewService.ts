@@ -61,30 +61,33 @@ export class ReviewService {
     }
   }
 
-  async findManyReviews({ take = DEFAULT_TAKE, skip = DEFAULT_SKIP, orderBy, game_title }: FindManyReviewProps) {
-    const reviews = await this.prisma.review.findMany({
+  async findManyReviews(props: FindManyReviewProps) {
+    this.logger.info({ props }, 'findManyReviews')
+    const { game_title, take, skip } = props
+    return this.prisma.review.findMany({
       take,
       skip,
       where: {
-        game_title: game_title || undefined,
+        game_title,
       },
-      include: {
-        game: true,
+      select: {
+        review_id: true,
+        rating: true,
+        game_title: true,
       },
     })
-    return reviews.map((review) => ({
-      review_id: review.review_id,
-      rating: review.rating,
-      game_title: review.game_title,
-    }))
   }
 
-  async findOneReview({ review_id }: FindOneReviewProps) {
+  async findOneReview(props: FindOneReviewProps) {
+    this.logger.info({ props }, 'findOneReview')
+    const { review_id } = props
     try {
       return this.prisma.review.findUnique({
-        where: { review_id: review_id },
-        include: {
-          game: true,
+        where: { review_id},
+        select: {
+          review_id: true,
+          rating: true,
+          game_title: true
         },
       })
     } catch (error) {
@@ -104,49 +107,6 @@ export class ReviewService {
     })
     return review
   }
-}
-/*    try {
-      console.log('Searching for game with title:', game_title)
-      let game = await this.prisma.game.findUnique({
-        where: { title: game_title },
-      })
-
-      if (!game) {
-        console.log('No match found, creating entry for:', game_title) //AFAICT it never gets past here
-        game = await this.prisma.game.create({
-          data: {
-            title: game_title,
-          },
-        })
-        console.log('game made:', game) //never logs
-      } else {
-        console.log('game found:', game) //also never got to this. Everything past here never shows up until the catch
-      }
-      console.log('made game for', game.title)
-      console.log('making review for', game.title)
-      console.log('Review data to create:', { rating, game_title: game.title })
-      const review = await this.prisma.review.create({
-        data: {
-          rating,
-          game_title: game.title,
-        },
-      })
-      console.log('Review created:', review)
-      return review
-    } catch (error) {
-      //here's the catch.
-      this.logger.error(`Error creating review for "${game_title}":`, error)
-
-      if (error instanceof PrismaClientKnownRequestError) {
-        if (error.code === 'P2002') {
-          console.error('Unique constraint')
-        } else if (error.code === 'P2003') {
-          console.error('Foreign key constraint')
-        }
-      }
-
-      throw new Error(`Could not create review for "${game_title}"`)
-    }
-  }
-}
-//I tried so hard to get this working and just couldn't make it happen*/
+}//I am the worlds biggest idiot. I did so much work and debugging and signal checking>
+//I was missing the .env for the api folder.
+//That was it.
